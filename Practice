@@ -19,3 +19,298 @@ result.show()
 
 # Save to Parquet (Optimized format)
 result.write.parquet("hdfs:///data/output/dept_salary_summary")
+
+
+
+
+# bash
+root@1eef5da3469c:/# su takeo
+takeo@1eef5da3469c:/$ cd
+takeo@1eef5da3469c:~$ ls
+a.txt          data1           installshive                 salesdetail_complex.csv  test.txt
+airflow        data_usage.csv  jsdk                         salesman.csv             test_folder
+bootcamp       emp.txt         kafka                        sms_data.csv             text1.txt
+bootcamp.csv   emp1.txt        non_part.txt                 spark                    wordCount
+call_data.csv  hadoop          orders.csv                   startApps                zipcodes.csv
+customer.csv   hive            pycharmprojects              startHadoop.sh           zookeeper
+customer.txt   installAll      redshift-jdbc42-2.1.0.9.jar  startHive.sh
+data           installs        restartHadoop.sh             stopHadoop.sh
+takeo@1eef5da3469c:~$ pyspark
+Python 3.10.6 (main, Nov 14 2022, 16:10:14) [GCC 11.3.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+26/03/06 05:47:36 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Welcome to
+      ____              __
+     / __/__  ___ _____/ /__
+    _\ \/ _ \/ _ `/ __/  '_/
+   /__ / .__/\_,_/_/ /_/\_\   version 3.3.2
+      /_/
+
+Using Python version 3.10.6 (main, Nov 14 2022 16:10:14)
+Spark context Web UI available at http://1eef5da3469c:4040
+Spark context available as 'sc' (master = local[*], app id = local-1772756257068).
+SparkSession available as 'spark'.
+>>> 
+>>> import pyspark
+>>> 
+>>> from pyspark.sql.functions import expr
+>>> 
+>>> 
+>>> data = [("James", "Sales", 3000), \
+...     ("Michael", "Sales", 4600), \
+...     ("Robert", "Sales", 4100), \
+...     ("Maria", "Finance", 3000), \
+...     ("James", "Sales", 3000), \
+...     ("Scott", "Finance", 3300), \
+...     ("Jen", "Finance", 3900), \
+...     ("Jeff", "Marketing", 3000), \
+...     ("Kumar", "Marketing", 2000), \
+...     ("Saif", "Sales", 4100) \
+...   ]
+>>> columns= ["employee_name", "department", "salary"]
+>>> df = spark.createDataFrame(data = data, schema = columns)
+>>> df.printSchema()
+root
+ |-- employee_name: string (nullable = true)
+ |-- department: string (nullable = true)
+ |-- salary: long (nullable = true)
+
+>>> df.show(truncate=False)
++-------------+----------+------+
+|employee_name|department|salary|
++-------------+----------+------+
+|James        |Sales     |3000  |
+|Michael      |Sales     |4600  |
+|Robert       |Sales     |4100  |
+|Maria        |Finance   |3000  |
+|James        |Sales     |3000  |
+|Scott        |Finance   |3300  |
+|Jen          |Finance   |3900  |
+|Jeff         |Marketing |3000  |
+|Kumar        |Marketing |2000  |
+|Saif         |Sales     |4100  |
++-------------+----------+------+
+
+>>> df1 = dr.distinct()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'dr' is not defined. Did you mean: 'df'?
+>>> df1 = df.distinct()
+>>> df1.show()
++-------------+----------+------+
+|employee_name|department|salary|
++-------------+----------+------+
+|        James|     Sales|  3000|
+|      Michael|     Sales|  4600|
+|       Robert|     Sales|  4100|
+|        Maria|   Finance|  3000|
+|        Scott|   Finance|  3300|
+|          Jen|   Finance|  3900|
+|         Jeff| Marketing|  3000|
+|        Kumar| Marketing|  2000|
+|         Saif|     Sales|  4100|
++-------------+----------+------+
+
+>>> df2 = df.dropDuplicates()
+>>> df2.show()
++-------------+----------+------+
+|employee_name|department|salary|
++-------------+----------+------+
+|        James|     Sales|  3000|
+|      Michael|     Sales|  4600|
+|       Robert|     Sales|  4100|
+|        Maria|   Finance|  3000|
+|        Scott|   Finance|  3300|
+|          Jen|   Finance|  3900|
+|         Jeff| Marketing|  3000|
+|        Kumar| Marketing|  2000|
+|         Saif|     Sales|  4100|
++-------------+----------+------+
+
+>>> print("Distinct count: "+str(df2.count()))
+Distinct count: 9
+>>> df2.show(truncate=False)
++-------------+----------+------+
+|employee_name|department|salary|
++-------------+----------+------+
+|James        |Sales     |3000  |
+|Michael      |Sales     |4600  |
+|Robert       |Sales     |4100  |
+|Maria        |Finance   |3000  |
+|Scott        |Finance   |3300  |
+|Jen          |Finance   |3900  |
+|Jeff         |Marketing |3000  |
+|Kumar        |Marketing |2000  |
+|Saif         |Sales     |4100  |
++-------------+----------+------+
+
+>>> dropDisDF = df.dropDuplicates(["department","salary"])
+>>> print("Distinct count of department & salary : "+str(dropDisDF.count()))
+Distinct count of department & salary : 8
+>>> dropDisDF.show(truncate=False)
++-------------+----------+------+
+|employee_name|department|salary|
++-------------+----------+------+
+|Maria        |Finance   |3000  |
+|Scott        |Finance   |3300  |
+|Jen          |Finance   |3900  |
+|Kumar        |Marketing |2000  |
+|Jeff         |Marketing |3000  |
+|James        |Sales     |3000  |
+|Robert       |Sales     |4100  |
+|Michael      |Sales     |4600  |
++-------------+----------+------+
+
+>>> dropDisDF = df.dropDuplicates(["department"])
+>>> dropDisDF.show(truncate=False)
++-------------+----------+------+
+|employee_name|department|salary|
++-------------+----------+------+
+|Maria        |Finance   |3000  |
+|Jeff         |Marketing |3000  |
+|James        |Sales     |3000  |
++-------------+----------+------+
+
+>>> simpleData = [("James","Sales","NY",90000,34,10000), \
+...     ("Michael","Sales","NY",86000,56,20000), \
+...     ("Robert","Sales","CA",81000,30,23000), \
+...     ("Maria","Finance","CA",90000,24,23000), \
+...     ("Raman","Finance","CA",99000,40,24000), \
+...     ("Scott","Finance","NY",83000,36,19000), \
+...     ("Jen","Finance","NY",79000,53,15000), \
+...     ("Jeff","Marketing","CA",80000,25,18000), \
+...     ("Kumar","Marketing","NY",91000,50,21000) \
+...   ]
+>>> columns= ["employee_name","department","state","salary","age","bonus"]
+>>> df = spark.createDataFrame(data = simpleData, schema = columns)
+>>> df.printSchema()
+root
+ |-- employee_name: string (nullable = true)
+ |-- department: string (nullable = true)
+ |-- state: string (nullable = true)
+ |-- salary: long (nullable = true)
+ |-- age: long (nullable = true)
+ |-- bonus: long (nullable = true)
+
+>>> df.show(truncate=False)
++-------------+----------+-----+------+---+-----+
+|employee_name|department|state|salary|age|bonus|
++-------------+----------+-----+------+---+-----+
+|James        |Sales     |NY   |90000 |34 |10000|
+|Michael      |Sales     |NY   |86000 |56 |20000|
+|Robert       |Sales     |CA   |81000 |30 |23000|
+|Maria        |Finance   |CA   |90000 |24 |23000|
+|Raman        |Finance   |CA   |99000 |40 |24000|
+|Scott        |Finance   |NY   |83000 |36 |19000|
+|Jen          |Finance   |NY   |79000 |53 |15000|
+|Jeff         |Marketing |CA   |80000 |25 |18000|
+|Kumar        |Marketing |NY   |91000 |50 |21000|
++-------------+----------+-----+------+---+-----+
+
+>>> from pyspark.sql.functions import col
+>>> df.sort("department","state").show(truncate=False)
++-------------+----------+-----+------+---+-----+
+|employee_name|department|state|salary|age|bonus|
++-------------+----------+-----+------+---+-----+
+|Raman        |Finance   |CA   |99000 |40 |24000|
+|Maria        |Finance   |CA   |90000 |24 |23000|
+|Jen          |Finance   |NY   |79000 |53 |15000|
+|Scott        |Finance   |NY   |83000 |36 |19000|
+|Jeff         |Marketing |CA   |80000 |25 |18000|
+|Kumar        |Marketing |NY   |91000 |50 |21000|
+|Robert       |Sales     |CA   |81000 |30 |23000|
+|Michael      |Sales     |NY   |86000 |56 |20000|
+|James        |Sales     |NY   |90000 |34 |10000|
++-------------+----------+-----+------+---+-----+
+
+>>> df.sort(col("department"),col("state")).show(truncate=False)
++-------------+----------+-----+------+---+-----+
+|employee_name|department|state|salary|age|bonus|
++-------------+----------+-----+------+---+-----+
+|Maria        |Finance   |CA   |90000 |24 |23000|
+|Raman        |Finance   |CA   |99000 |40 |24000|
+|Scott        |Finance   |NY   |83000 |36 |19000|
+|Jen          |Finance   |NY   |79000 |53 |15000|
+|Jeff         |Marketing |CA   |80000 |25 |18000|
+|Kumar        |Marketing |NY   |91000 |50 |21000|
+|Robert       |Sales     |CA   |81000 |30 |23000|
+|Michael      |Sales     |NY   |86000 |56 |20000|
+|James        |Sales     |NY   |90000 |34 |10000|
++-------------+----------+-----+------+---+-----+
+
+>>> df.orderBy("department","state").show(truncate=False)
++-------------+----------+-----+------+---+-----+
+|employee_name|department|state|salary|age|bonus|
++-------------+----------+-----+------+---+-----+
+|Maria        |Finance   |CA   |90000 |24 |23000|
+|Raman        |Finance   |CA   |99000 |40 |24000|
+|Scott        |Finance   |NY   |83000 |36 |19000|
+|Jen          |Finance   |NY   |79000 |53 |15000|
+|Jeff         |Marketing |CA   |80000 |25 |18000|
+|Kumar        |Marketing |NY   |91000 |50 |21000|
+|Robert       |Sales     |CA   |81000 |30 |23000|
+|James        |Sales     |NY   |90000 |34 |10000|
+|Michael      |Sales     |NY   |86000 |56 |20000|
++-------------+----------+-----+------+---+-----+
+
+>>> df.orderBy(col("department"),col("state")).show(truncate=False)
++-------------+----------+-----+------+---+-----+
+|employee_name|department|state|salary|age|bonus|
++-------------+----------+-----+------+---+-----+
+|Raman        |Finance   |CA   |99000 |40 |24000|
+|Maria        |Finance   |CA   |90000 |24 |23000|
+|Scott        |Finance   |NY   |83000 |36 |19000|
+|Jen          |Finance   |NY   |79000 |53 |15000|
+|Jeff         |Marketing |CA   |80000 |25 |18000|
+|Kumar        |Marketing |NY   |91000 |50 |21000|
+|Robert       |Sales     |CA   |81000 |30 |23000|
+|James        |Sales     |NY   |90000 |34 |10000|
+|Michael      |Sales     |NY   |86000 |56 |20000|
++-------------+----------+-----+------+---+-----+
+
+>>> df.sort(df.department.asc(),df.state.desc()).show(truncate=False)
++-------------+----------+-----+------+---+-----+
+|employee_name|department|state|salary|age|bonus|
++-------------+----------+-----+------+---+-----+
+|Scott        |Finance   |NY   |83000 |36 |19000|
+|Jen          |Finance   |NY   |79000 |53 |15000|
+|Maria        |Finance   |CA   |90000 |24 |23000|
+|Raman        |Finance   |CA   |99000 |40 |24000|
+|Kumar        |Marketing |NY   |91000 |50 |21000|
+|Jeff         |Marketing |CA   |80000 |25 |18000|
+|James        |Sales     |NY   |90000 |34 |10000|
+|Michael      |Sales     |NY   |86000 |56 |20000|
+|Robert       |Sales     |CA   |81000 |30 |23000|
++-------------+----------+-----+------+---+-----+
+
+>>> df.sort(col("department").asc(),col("state").desc()).show(truncate=False)
++-------------+----------+-----+------+---+-----+
+|employee_name|department|state|salary|age|bonus|
++-------------+----------+-----+------+---+-----+
+|Jen          |Finance   |NY   |79000 |53 |15000|
+|Scott        |Finance   |NY   |83000 |36 |19000|
+|Raman        |Finance   |CA   |99000 |40 |24000|
+|Maria        |Finance   |CA   |90000 |24 |23000|
+|Kumar        |Marketing |NY   |91000 |50 |21000|
+|Jeff         |Marketing |CA   |80000 |25 |18000|
+|Michael      |Sales     |NY   |86000 |56 |20000|
+|James        |Sales     |NY   |90000 |34 |10000|
+|Robert       |Sales     |CA   |81000 |30 |23000|
++-------------+----------+-----+------+---+-----+
+
+>>> df.orderBy(col("department").asc(),col("state").desc()).show(truncate=False)
++-------------+----------+-----+------+---+-----+
+|employee_name|department|state|salary|age|bonus|
++-------------+----------+-----+------+---+-----+
+|Scott        |Finance   |NY   |83000 |36 |19000|
+|Jen          |Finance   |NY   |79000 |53 |15000|
+|Raman        |Finance   |CA   |99000 |40 |24000|
+|Maria        |Finance   |CA   |90000 |24 |23000|
+|Kumar        |Marketing |NY   |91000 |50 |21000|
+|Jeff         |Marketing |CA   |80000 |25 |18000|
+|James        |Sales     |NY   |90000 |34 |10000|
+|Michael      |Sales     |NY   |86000 |56 |20000|
+|Robert       |Sales     |CA   |81000 |30 |23000|
++-------------+----------+-----+------+---+-----+
+
+>>> 
