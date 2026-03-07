@@ -314,3 +314,15 @@ root
 +-------------+----------+-----+------+---+-----+
 
 >>> 
+
+from pyspark.sql import SparkSession
+
+# Initialize Spark Session
+spark = SparkSession.builder.appName("SalesAnalysis").getOrCreate()
+
+# Read JSON
+df = spark.read.json("sales.json")
+
+# Filter and Show
+high_sales = df.filter(df["amount"] > 500)
+high_sales.show()
