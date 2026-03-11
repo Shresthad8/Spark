@@ -356,3 +356,26 @@ df = spark.read.json("sales.json")
 # Filter and Show
 high_sales = df.filter(df["amount"] > 500)
 high_sales.show()
+
+
+##Read a large JSON dataset of "Employees," filter for those over 30, and calculate the average salary by department.
+
+from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
+
+# Initialize Spark
+spark = SparkSession.builder.appName("DeptAnalysis").getOrCreate()
+
+# Load Data
+df = spark.read.json("hdfs:///data/employees.json")
+
+# Process: Filter -> Group -> Aggregate
+result = df.filter(df.age > 30) \
+           .groupBy("department") \
+           .agg(F.avg("salary").alias("avg_salary"))
+
+# Show results
+result.show()
+
+# Save to Parquet (Optimized format)
+result.write.parquet("hdfs:///data/output/dept_salary_summary")
