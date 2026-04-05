@@ -133,6 +133,13 @@ NameError: name 'dr' is not defined. Did you mean: 'df'?
 |         Saif|     Sales|  4100|
 +-------------+----------+------+
 
+
+# Initialize Spark
+spark = SparkSession.builder.appName("DeptAnalysis").getOrCreate()
+
+# Load Data
+df = spark.read.json("hdfs:///data/employees.json")
+
 >>> print("Distinct count: "+str(df2.count()))
 Distinct count: 9
 >>> df2.show(truncate=False)
