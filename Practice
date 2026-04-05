@@ -14,6 +14,12 @@ result = df.filter(df.age > 30) \
            .groupBy("department") \
            .agg(F.avg("salary").alias("avg_salary"))
 
+
+# Process: Filter -> Group -> Aggregate
+result = df.filter(df.age > 30) \
+           .groupBy("department") \
+           .agg(F.avg("salary").alias("avg_salary"))
+
 # Show results
 result.show()
 
