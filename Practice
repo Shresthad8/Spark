@@ -81,6 +81,12 @@ root
  |-- department: string (nullable = true)
  |-- salary: long (nullable = true)
 
+
+# Process: Filter -> Group -> Aggregate
+result = df.filter(df.age > 30) \
+           .groupBy("department") \
+           .agg(F.avg("salary").alias("avg_salary"))
+
 >>> df.show(truncate=False)
 +-------------+----------+------+
 |employee_name|department|salary|
