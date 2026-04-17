@@ -451,6 +451,11 @@ spark = SparkSession.builder.appName("DeptAnalysis").getOrCreate()
 # Load Data
 df = spark.read.json("hdfs:///data/employees.json")
 
+ |-- employee_name: string (nullable = true)
+ |-- department: string (nullable = true)
+ |-- salary: long (nullable = true)
+
+
 # Process: Filter -> Group -> Aggregate
 result = df.filter(df.age > 30) \
            .groupBy("department") \
