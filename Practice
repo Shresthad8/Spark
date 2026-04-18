@@ -509,6 +509,12 @@ result = df.filter(df.age > 30) \
 # Show results
 result.show()
 
+# Show results
+result.show()
+
+# Save to Parquet (Optimized format)
+result.write.parquet("hdfs:///data/output/dept_salary_summary")
+
 # Save to Parquet (Optimized format)
 result.write.parquet("hdfs:///data/output/dept_salary_summary")
 
