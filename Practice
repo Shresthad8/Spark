@@ -6,6 +6,10 @@ from pyspark.sql import functions as F
 # Initialize Spark
 spark = SparkSession.builder.appName("DeptAnalysis").getOrCreate()
 
+# Save to Parquet (Optimized format)
+result.write.parquet("hdfs:///data/output/dept_salary_summary")
+
+
 # Load Data
 df = spark.read.json("hdfs:///data/employees.json")
 
