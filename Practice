@@ -526,6 +526,13 @@ result = df.filter(df.age > 30) \
 # Show results
 result.show()
 
+>>> df1 = dr.distinct()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'dr' is not defined. Did you mean: 'df'?
+>>> df1 = df.distinct()
+>>> df1.show()
+
 # Show results
 result.show()
 
